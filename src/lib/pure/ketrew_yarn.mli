@@ -15,8 +15,8 @@
 (**************************************************************************)
 
 (** Implementation of the {!LONG_RUNNING} API asking Aapache Yarn
-    for ressources (and using {!Ketrew_daemonize} to “keep” the
-    process group together. *)
+    for resources, using {!Ketrew_daemonize} to “keep” the process group
+    together. *)
 
 (** This module implements {!Ketrew_long_running.LONG_RUNNING} plugin-API.
 *)
