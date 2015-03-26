@@ -95,6 +95,22 @@ val get_list_of_ids: t ->
    [> `Database of Trakeva.Error.t
    | `Target of [> `Deserilization of string ] ]) Deferred_result.t
 
+(** Module dealing with “target summaries” as in
+    {!Ketrew_gen_protocol_v0.Target_summary}. *)
+module Summary: sig
+  type engine = t
+  type t = Ketrew_gen_protocol_v0.Target_summary.t
+
+  (** Get a summary from a target in the database. *)
+  val of_id: engine -> Ketrew_target.id ->
+    (t, [> `Database of
+             [> `Get of Trakeva.Key_in_collection.t | `Load of string ] *
+             string
+        | `Missing_data of string
+        | `Target of [> `Deserilization of string ] ]) Deferred_result.t
+
+  end
+
 module Run_automaton : sig
   val step :
     t ->

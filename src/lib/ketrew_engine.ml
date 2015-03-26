@@ -827,6 +827,25 @@ let get_list_of_ids t query =
   in
   return list_of_ids
 
+module Summary = struct
+
+  type engine = t
+  include Ketrew_gen_protocol_v0.Target_summary
+
+  let of_id t target_id =
+    get_target t target_id
+    >>= fun target ->
+    let summary =
+      let open Ketrew_target in
+      let (`Time time, `Log _, `Info info) = State.summary (state target) in
+      {id = id target;
+       name = name target;
+       short_status = (time, State.simplify (state target), info)}
+    in
+    return summary
+
+end
+
 let kill t ~id =
   Killing_targets.add_target_ids_to_kill_list t [id]
 

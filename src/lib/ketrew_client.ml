@@ -127,6 +127,13 @@ module Http_client = struct
   let kill t id_list = kill_or_restart t (`Kill_targets id_list)
   let restart t id_list = kill_or_restart t (`Restart_targets id_list)
 
+  let get_target_summaries t ids =
+    call_json t ~path:"/api"
+      ~meta_meth:(`Post_message (`Get_target_summaries ids))
+    >>= filter_down_message ~loc:`Targets ~f:(function
+      | `List_of_target_summaries l -> Some l
+      | _ -> None)
+    
   let call_query t ~target query =
     let id = Ketrew_target.id target in
     let message = `Call_query (id, query) in
@@ -249,6 +256,14 @@ let restart_target t ids =
     return ()
   | `Http_client c ->
     Http_client.restart c ids
+
+let get_target_summaries t ids =
+  match t with
+  | `Standalone s ->
+    let open Standalone in
+    Deferred_list.while_sequential ids (Ketrew_engine.Summary.of_id s.engine)
+  | `Http_client c ->
+    Http_client.get_target_summaries c ids
 
 let get_local_engine = function
 | `Standalone s -> (Some s.Standalone.engine)

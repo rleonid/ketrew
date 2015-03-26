@@ -18,12 +18,21 @@
 type target_v0 
   <ocaml from="Ketrew_gen_target_v0.Target" > = abstract
 
+type target_summary = {
+  id: string;
+  name: string;
+  short_status:
+    (* Time × Simplified-status × Some more info on the status,
+       c.f. Ketrew_target.State.summary *)
+    (float * [ In_progress | Failed | Activable | Successful ] * string list);
+}
 
 type down_message = [
   | List_of_targets of target_v0 list
   | List_of_target_ids of string list
   | List_of_query_descriptions of (string * string) list
   | Query_result of string
+  | List_of_target_summaries of target_summary list
   | Ok
 ]
 
@@ -40,6 +49,7 @@ type up_message = [
   | Submit_targets of target_v0 list
   | Kill_targets of string list (* List of Ids *)
   | Restart_targets of string list (* List of Ids *)
+  | Get_target_summaries of string list (* List of Ids *)
   | Get_target_ids of target_query
 ]
 

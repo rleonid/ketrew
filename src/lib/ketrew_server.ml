@@ -189,6 +189,22 @@ let answer_get_targets ~server_state target_ids =
              `List_of_targets
                (List.map ~f:Ketrew_target.to_serializable targets)))
 
+let answer_get_target_summaries ~server_state target_ids =
+  Deferred_list.while_sequential target_ids ~f:(fun id ->
+      Ketrew_engine.Summary.of_id server_state.state id
+      >>< function
+      | `Ok summary ->
+        return (Some summary)
+      | `Error e -> 
+        Log.(s "Error while getting the target " % s id % s ": "
+             % s (Ketrew_error.to_string e) @ error);
+        return None)
+  >>| List.filter_opt
+  >>= fun summaries ->
+  return (`Message
+            (`Json,
+             `List_of_target_summaries summaries))
+
 let answer_get_target_available_queries ~server_state target_id =
   Ketrew_engine.get_target server_state.state target_id
   >>= fun target ->
@@ -241,6 +257,7 @@ let answer_get_target_ids ~server_state query =
   >>= fun list_of_ids ->
   return (`Message (`Json, `List_of_target_ids list_of_ids))
 
+  
 let api_service ~server_state ~body req =
   get_post_body req ~body
   >>= fun body ->
@@ -278,6 +295,10 @@ let api_service ~server_state ~body req =
     with_capability `See_targets
     >>= fun () ->
     answer_get_target_ids ~server_state query
+  | `Get_target_summaries query ->
+    with_capability `See_targets
+    >>= fun () ->
+    answer_get_target_summaries ~server_state query
   end
 
 (** {2 Dispatcher} *)
