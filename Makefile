@@ -1,5 +1,5 @@
 
-.PHONY: all clean build configure distclean doc apidoc gen test-env
+.PHONY: all clean build configure distclean doc apidoc gen test-env build-with-oasis
 
 PLEASE=ocaml tools/please.ml
 
@@ -21,7 +21,7 @@ _build/VERSION:
 OCAMLBUILD_ANNOYING_LINKS=main.byte main.native Workflow_Examples.native integration.native dummy_plugin_user.native
 OWN_BINARIES= ketrew-test ketrew ketrew-pure ketrew-workflow-examples-test ketrew-integration-test
 
-build: _build/VERSION
+build-with-oasis: _build/VERSION
 	ocaml setup.ml -build && \
 	    rm -f $(OCAMLBUILD_ANNOYING_LINKS) && \
 	    cp _build/src/app/main.native ketrew && \
@@ -29,6 +29,12 @@ build: _build/VERSION
 	    cp _build/src/test/Workflow_Examples.native ketrew-workflow-examples-test && \
 	    cp _build/src/test/integration.native ketrew-integration-test && \
             echo "Done"
+
+_build/client.js: _build/src/client-joo/main.byte
+	js_of_ocaml +weak.js +toplevel.js  _build/src/client-joo/main.byte -o $@
+
+build: build-with-oasis _build/client.js
+
 
 doc:
 	./tools/build-documentation.sh
